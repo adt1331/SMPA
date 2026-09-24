@@ -122,7 +122,7 @@ export const site = {
   summaryLine:
     'ITC Royal Bengal → Netaji Subhas Dock → Century Ports Ltd. → SMPA Head Office',
   prescribedRouteLine:
-    'Maa Flyover → Kidderpore Road → C.G.R. Road → NSD → KPD → Hastings → Strand Road',
+    'Maa Flyover → Kidderpore Road → Garden Reach Road → NSD → KPD → Hastings → Strand Road',
   /**
    * Official emblem. Place a file in /public and set the path here, e.g.
    * '/smpa-logo.png'. Leave empty to render the neutral placeholder.
@@ -228,17 +228,17 @@ export const routePoints: RoutePoint[] = [
   },
   {
     id: null,
-    key: 'cgr-road-inbound',
-    name: 'C.G.R. Road',
+    key: 'garden-reach-road-inbound',
+    name: 'Garden Reach Road',
     type: 'road',
     phase: 'arrival',
     label: 'Prescribed Road',
-    instruction: 'Proceed along C.G.R. Road towards Gate No. 7.',
+    instruction: 'Proceed along Garden Reach Road towards Gate No. 7.',
     // Approximate. Positioned to stay consistent with the SMPA-confirmed Gate
     // No. 7 coordinate, which lies west of it. Replace when surveyed.
-    mapsQuery: 'Circular Garden Reach Road, Kolkata',
+    mapsQuery: 'Garden Reach Road, Kolkata',
     coordinates: { lat: 22.5415, lng: 88.3105, accuracy: 'approximate' },
-    driver: { action: 'Continue', primary: 'C.G.R. Road' },
+    driver: { action: 'Continue', primary: 'Garden Reach Road' },
   },
   {
     id: 2,
@@ -320,15 +320,15 @@ export const routePoints: RoutePoint[] = [
   },
   {
     id: null,
-    key: 'cgr-road-outbound',
-    name: 'C.G.R. Road',
+    key: 'garden-reach-road-outbound',
+    name: 'Garden Reach Road',
     type: 'road',
     phase: 'departure',
     label: 'Prescribed Road',
-    instruction: 'On exiting the port area, rejoin C.G.R. Road.',
-    mapsQuery: 'Circular Garden Reach Road, Kolkata',
+    instruction: 'On exiting the port area, rejoin Garden Reach Road.',
+    mapsQuery: 'Garden Reach Road, Kolkata',
     coordinates: { lat: 22.5415, lng: 88.3105, accuracy: 'approximate' },
-    driver: { action: 'Continue', primary: 'C.G.R. Road' },
+    driver: { action: 'Continue', primary: 'Garden Reach Road' },
   },
   {
     id: null,
@@ -403,13 +403,13 @@ export const routeAtAGlance = [
   { text: 'ITC Royal Bengal', type: 'start' as StopType },
   { text: 'Maa Flyover', type: 'road' as StopType },
   { text: 'Kidderpore Road', type: 'road' as StopType },
-  { text: 'C.G.R. Road', type: 'road' as StopType },
+  { text: 'Garden Reach Road', type: 'road' as StopType },
   { text: 'Gate 7 — Enter NSD', type: 'gate' as StopType },
   { text: 'Netaji Subhas Dock Visit', type: 'visit' as StopType },
   { text: 'Gate 3 — Exit NSD', type: 'gate' as StopType },
   { text: '2 KPD Gate', type: 'gate' as StopType },
   { text: 'Century Ports — KPD-I (West)', type: 'visit' as StopType },
-  { text: 'C.G.R. Road', type: 'road' as StopType },
+  { text: 'Garden Reach Road', type: 'road' as StopType },
   { text: 'Hastings', type: 'road' as StopType },
   { text: 'SMPA Head Office', type: 'end' as StopType },
 ];

@@ -79,7 +79,7 @@ export function fullRouteUrl(opts: { navigate?: boolean } = {}): string {
     'itc-royal-bengal',
     'maa-flyover',
     'kidderpore-road',
-    'cgr-road-inbound',
+    'garden-reach-road-inbound',
     'nsd-gate-7',
     'century-ports-kpd-1-west',
     'hastings',
@@ -96,7 +96,7 @@ export function arrivalLegUrl(opts: { navigate?: boolean } = {}): string {
     'itc-royal-bengal',
     'maa-flyover',
     'kidderpore-road',
-    'cgr-road-inbound',
+    'garden-reach-road-inbound',
     'nsd-gate-7',
   ]);
   return directionsUrl(stops[0], stops[stops.length - 1], stops.slice(1, -1), opts);
@@ -106,7 +106,7 @@ export function arrivalLegUrl(opts: { navigate?: boolean } = {}): string {
 export function departureLegUrl(opts: { navigate?: boolean } = {}): string {
   const stops = corridor([
     'century-ports-kpd-1-west',
-    'cgr-road-outbound',
+    'garden-reach-road-outbound',
     'hastings',
     'smpa-head-office',
   ]);

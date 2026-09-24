@@ -9,13 +9,13 @@ WhatsApp, email and QR code and opened on a phone.
 ITC Royal Bengal
   → Maa Flyover
   → Kidderpore Road
-  → C.G.R. Road
+  → Garden Reach Road
   → Gate No. 7, Netaji Subhas Dock
   → Netaji Subhas Dock Visit
   → Gate No. 3, Netaji Subhas Dock
   → 2 KPD Gate
   → Century Ports Ltd. — KPD-I (West)
-  → C.G.R. Road
+  → Garden Reach Road
   → Hastings
   → SMPA Head Office, 15 Strand Road
 ```
@@ -41,6 +41,14 @@ faster alternative.
 | Official SMPA emblem | ⬜ Placeholder rendered | `routeConfig.ts` → `site.logoSrc` |
 | Deployed URL (QR code + share link) | ⬜ `ADD_DEPLOYED_URL_HERE` | `routeConfig.ts` → `SITE_URL` |
 | Visit date, reporting time, vehicle, coordinator, contact | ⬜ Intentionally empty — section hidden | `routeConfig.ts` → `visitDetails` |
+
+### Road naming — resolved
+
+The route road is **Garden Reach Road** throughout. It was previously written
+as "C.G.R. Road" (Circular Garden Reach Road); SMPA confirmed the intended road
+is Garden Reach Road, which is also the name used in the within-dock movement
+sequence. The two now agree, and the Google Maps query is
+`Garden Reach Road, Kolkata`.
 
 ### Open question for SMPA
 
@@ -82,9 +90,9 @@ When SMPA supplies further surveyed positions, set `coordinates` with
 interface picks up the navigation button, the map marker and the corridor leg
 automatically.
 
-Note: `C.G.R. Road` was repositioned to stay geometrically consistent with the
-confirmed Gate No. 7 coordinate, which lies west of the original estimate. It
-remains an approximation.
+Note: `Garden Reach Road` was repositioned to stay geometrically consistent
+with the confirmed Gate No. 7 coordinate, which lies west of the original
+estimate. It remains an approximation.
 
 ---
 

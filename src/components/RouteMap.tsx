@@ -45,7 +45,7 @@ const legs: Leg[] = plotted.slice(0, -1).reduce<Leg[]>((acc, point, index) => {
   const next = plotted[index + 1];
   const from = latLngOf(point);
   const to = latLngOf(next);
-  // C.G.R. Road appears twice with identical coordinates; skip the zero-length leg.
+  // Garden Reach Road appears twice with identical coordinates; skip the zero-length leg.
   if (from[0] === to[0] && from[1] === to[1]) return acc;
 
   const internal = isPortLocation(point) && isPortLocation(next);
