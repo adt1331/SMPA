@@ -57,6 +57,23 @@ export function DriverView({ onExit }: { onExit: () => void }) {
                     {point.driver.secondary}
                   </p>
                 )}
+                {point.internalMovement && (
+                  <div className="mt-3 border-t-2 border-rule pt-3">
+                    <p className="text-sm font-bold uppercase tracking-[0.14em] text-amber-800">
+                      {point.internalMovement.title} — follow SMPA
+                    </p>
+                    <ol className="mt-2 space-y-1.5">
+                      {point.internalMovement.steps.map((step, stepIndex) => (
+                        <li key={step} className="flex gap-2.5 text-lg font-semibold leading-snug text-navy sm:text-xl">
+                          <span aria-hidden="true" className="w-6 shrink-0 tabular-nums text-slate-ink">
+                            {stepIndex + 1}.
+                          </span>
+                          <span>{step}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
               </div>
               {!last && (
                 <div className="flex justify-center py-1.5" aria-hidden="true">

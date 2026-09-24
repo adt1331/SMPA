@@ -32,16 +32,31 @@ faster alternative.
 
 | Item | Status | Where |
 |---|---|---|
-| Gate No. 7, Netaji Subhas Dock — coordinates | **To be confirmed by SMPA** | `routeConfig.ts` → `nsd-gate-7` |
-| Netaji Subhas Dock — visit point coordinates | **To be confirmed by SMPA** | `routeConfig.ts` → `netaji-subhas-dock` |
-| Gate No. 3, Netaji Subhas Dock — coordinates | **To be confirmed by SMPA** | `routeConfig.ts` → `nsd-gate-3` |
-| 2 KPD Gate — coordinates | **To be confirmed by SMPA** | `routeConfig.ts` → `kpd-gate-2` |
-| Century Ports Ltd., KPD-I (West) — coordinates | **To be confirmed by SMPA** | `routeConfig.ts` → `century-ports-kpd-1-west` |
-| Official SMPA emblem | Placeholder rendered | `routeConfig.ts` → `site.logoSrc` |
-| Deployed URL (QR code + share link) | `ADD_DEPLOYED_URL_HERE` | `routeConfig.ts` → `SITE_URL` |
-| Visit date, reporting time, vehicle, coordinator, contact | Empty — section hidden | `routeConfig.ts` → `visitDetails` |
+| Gate No. 7, Netaji Subhas Dock — coordinates | ✅ **Confirmed by SMPA** `22.538664, 88.302729` | `routeConfig.ts` → `nsd-gate-7` |
+| Century Ports Ltd., KPD-I (West) — coordinates | ✅ **Confirmed by SMPA** `22.544800, 88.314659` | `routeConfig.ts` → `century-ports-kpd-1-west` |
+| Within-dock movement sequence | ✅ **Supplied by SMPA**, reproduced verbatim | `routeConfig.ts` → `netaji-subhas-dock.internalMovement` |
+| Netaji Subhas Dock — visit point coordinates | ⬜ To be confirmed by SMPA | `routeConfig.ts` → `netaji-subhas-dock` |
+| Gate No. 3, Netaji Subhas Dock — coordinates | ⬜ To be confirmed by SMPA | `routeConfig.ts` → `nsd-gate-3` |
+| 2 KPD Gate — coordinates | ⬜ To be confirmed by SMPA | `routeConfig.ts` → `kpd-gate-2` |
+| Official SMPA emblem | ⬜ Placeholder rendered | `routeConfig.ts` → `site.logoSrc` |
+| Deployed URL (QR code + share link) | ⬜ `ADD_DEPLOYED_URL_HERE` | `routeConfig.ts` → `SITE_URL` |
+| Visit date, reporting time, vehicle, coordinator, contact | ⬜ Intentionally empty — section hidden | `routeConfig.ts` → `visitDetails` |
 
-These are deliberate gaps, not omissions. **No coordinate for an
+### Open question for SMPA
+
+The supplied within-dock movement sequence reads:
+
+> Gate No. 7 NSD → Berth No. 7 (JSW) → Past Gate No. 4 → Past Gate No. 3 → to
+> Berth No. 2 (200 T crane) **or** to Clock Tower & NSD Lock → Out from Gate
+> No. 3 → along Garden Reach Road → Dock-I (West) KPD
+
+It does **not** mention **2 KPD Gate**, which the prescribed route places between
+Gate No. 3 and Century Ports Ltd. Both are currently shown: the numbered route
+retains 2 KPD Gate as stop 05, and the movement sequence is reproduced exactly
+as supplied. Confirm with SMPA whether the vehicle passes 2 KPD Gate on that
+leg, and reconcile the two.
+
+The remaining blanks are deliberate gaps, not omissions. **No coordinate for an
 access-controlled gate or terminal has been invented.** Where one is absent the
 interface prints `COORDINATES TO BE CONFIRMED BY SMPA` and suppresses the
 navigation button rather than sending a driver to a guessed position.
@@ -52,16 +67,24 @@ The guide is fully usable in this state.
 
 Every coordinate in `routeConfig.ts` is marked with an `accuracy` field:
 
-- `'approximate'` — a public landmark or public road, good enough to draw an
-  indicative corridor on the map. **Not** used for navigation.
-- coordinates set to `null` — access-controlled locations that must not be
-  guessed.
+- `'confirmed'` — supplied by SMPA for this visit. Used for navigation: the deep
+  link is built from the coordinate itself, which is more reliable than a place
+  name for a gate Google may not index. Currently Gate No. 7 and Century Ports
+  Ltd., KPD-I (West).
+- `'approximate'` — a public landmark or public road, not surveyed. Good enough
+  to draw an indicative corridor on the map. **Not** used for navigation —
+  those links use place-name queries so Google resolves them against its own
+  database.
+- `coordinates: null` — access-controlled locations that must not be guessed.
 
-**No coordinate is marked verified.** Navigation deep links are built from
-place-name queries, not from these coordinates, so Google Maps resolves them
-against its own database. When SMPA supplies surveyed positions, replace the
-`coordinates` values and add a `mapsQuery` for any location that then becomes
-reliably routable.
+When SMPA supplies further surveyed positions, set `coordinates` with
+`accuracy: 'confirmed'` and add the `lat,lng` string as `mapsQuery`. The
+interface picks up the navigation button, the map marker and the corridor leg
+automatically.
+
+Note: `C.G.R. Road` was repositioned to stay geometrically consistent with the
+confirmed Gate No. 7 coordinate, which lies west of the original estimate. It
+remains an approximation.
 
 ---
 
@@ -160,7 +183,8 @@ fabricated in the source.
 | Feature | Notes |
 |---|---|
 | **Route at a Glance** | Compact, screenshot-friendly sequence for forwarding on WhatsApp. |
-| **Interactive map** | Leaflet + OpenStreetMap. Only approximate public-road points are plotted; unconfirmed port locations are listed beneath the map, not drawn. |
+| **Interactive map** | Leaflet + OpenStreetMap. Public-road legs are drawn solid; the leg between the two SMPA-confirmed port points is dashed and explicitly not presented as a routed road. Unconfirmed locations are listed beneath the map, not drawn. |
+| **Within-dock movement** | The SMPA-designated sequence is reproduced verbatim at stop 03, in the Driver View and on the print sheet. It is never drawn as a routed path. |
 | **Three-phase journey** | Phases 1 and 3 are public roads with Google Maps navigation. Phase 2 is the access-controlled port area and is explicitly marked as governed by SMPA instructions. |
 | **Driver View** | `#driver` — very large high-contrast type, designed to be held up to a driver. Linkable directly. |
 | **Share** | Web Share API, falling back to clipboard with a "Route link copied" confirmation, falling back to a prompt. |

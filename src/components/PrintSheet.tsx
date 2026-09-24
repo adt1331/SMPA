@@ -98,6 +98,7 @@ export function PrintSheetBottom() {
   }, [url]);
 
   const stops = routePoints.filter((p) => p.type !== 'road');
+  const internal = routePoints.find((p) => p.internalMovement)?.internalMovement;
 
   return (
     <div className="print-only print-bottom">
@@ -137,7 +138,17 @@ export function PrintSheetBottom() {
         </tbody>
       </table>
 
-      <div className="mt-3 flex items-start gap-4 break-inside-avoid">
+      {internal && (
+        <div className="mt-2.5 break-inside-avoid border border-navy p-2">
+          <p className="eyebrow">{internal.title} — Netaji Subhas Dock</p>
+          <p className="mt-1 text-[10px] leading-snug">
+            {internal.steps.join('  \u2192  ')}
+          </p>
+          <p className="mt-1 text-[9px] italic leading-snug">{internal.source}</p>
+        </div>
+      )}
+
+      <div className="mt-2.5 flex items-start gap-4 break-inside-avoid">
         <div className="flex-1 border border-navy p-2">
           <p className="eyebrow">{routeNotice.title}</p>
           <p className="mt-1 text-[10px] leading-snug">{routeNotice.body}</p>

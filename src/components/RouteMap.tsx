@@ -25,14 +25,38 @@ type Plotted = RoutePoint & { coordinates: NonNullable<RoutePoint['coordinates']
 
 const plotted = routePoints.filter((p): p is Plotted => p.coordinates !== null);
 const unplotted = routePoints.filter((p) => p.coordinates === null);
+const confirmed = plotted.filter((p) => p.coordinates.accuracy === 'confirmed');
 
-/** De-duplicated corridor line: C.G.R. Road appears inbound and outbound. */
-const corridorLatLngs: [number, number][] = plotted
-  .map((p) => [p.coordinates.lat, p.coordinates.lng] as [number, number])
-  .filter(
-    (latlng, index, all) =>
-      index === 0 || latlng[0] !== all[index - 1][0] || latlng[1] !== all[index - 1][1],
-  );
+const latLngOf = (p: Plotted): [number, number] => [p.coordinates.lat, p.coordinates.lng];
+
+/** Every plotted point, for fitting the viewport. */
+const allLatLngs: [number, number][] = plotted.map(latLngOf);
+
+/**
+ * A leg is INTERNAL when both of its endpoints sit inside the controlled port
+ * area. Those legs are drawn dashed and are never presented as a routed road —
+ * movement between them follows SMPA instructions, not a mapping service.
+ */
+const isPortLocation = (p: Plotted) => p.type === 'gate' || p.type === 'visit';
+
+type Leg = { path: [number, number][]; internal: boolean };
+
+const legs: Leg[] = plotted.slice(0, -1).reduce<Leg[]>((acc, point, index) => {
+  const next = plotted[index + 1];
+  const from = latLngOf(point);
+  const to = latLngOf(next);
+  // C.G.R. Road appears twice with identical coordinates; skip the zero-length leg.
+  if (from[0] === to[0] && from[1] === to[1]) return acc;
+
+  const internal = isPortLocation(point) && isPortLocation(next);
+  const last = acc[acc.length - 1];
+  if (last && last.internal === internal) {
+    last.path.push(to);
+  } else {
+    acc.push({ path: [from, to], internal });
+  }
+  return acc;
+}, []);
 
 function markerClass(point: Plotted): string {
   if (point.type === 'road') return 'marker-pin marker-pin--road';
@@ -51,7 +75,9 @@ function popupHtml(point: Plotted): string {
     point.subtitle
       ? `<p style="margin:0;font-size:12px;color:#52616b">${escape(point.subtitle)}</p>`
       : '',
-    `<p style="margin:4px 0 0;font-size:11px;color:#52616b">Approximate position — indicative only</p>`,
+    point.coordinates.accuracy === 'confirmed'
+      ? `<p style="margin:4px 0 0;font-size:11px;color:#165d82;font-weight:600">Coordinates confirmed by SMPA</p>`
+      : `<p style="margin:4px 0 0;font-size:11px;color:#52616b">Approximate position — indicative only</p>`,
   ].join('');
 }
 
@@ -83,19 +109,23 @@ export function RouteMap() {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(map);
 
-    // Prescribed public-road corridor. Thin, continuous, no competing overlays.
-    const casing = L.polyline(corridorLatLngs, {
-      color: '#ffffff',
-      weight: 7,
-      opacity: 0.9,
-      lineJoin: 'round',
-    }).addTo(map);
-    L.polyline(corridorLatLngs, {
-      color: '#165d82',
-      weight: 3,
-      opacity: 1,
-      lineJoin: 'round',
-    }).addTo(map);
+    // Prescribed corridor. Solid on public roads; dashed inside the port area,
+    // where no routed path is claimed.
+    legs.forEach((leg) => {
+      L.polyline(leg.path, {
+        color: '#ffffff',
+        weight: 7,
+        opacity: 0.9,
+        lineJoin: 'round',
+      }).addTo(map);
+      L.polyline(leg.path, {
+        color: leg.internal ? '#8a5a00' : '#165d82',
+        weight: 3,
+        opacity: 1,
+        lineJoin: 'round',
+        dashArray: leg.internal ? '5 6' : undefined,
+      }).addTo(map);
+    });
 
     plotted.forEach((point) => {
       const size = point.type === 'road' ? 12 : 30;
@@ -116,7 +146,7 @@ export function RouteMap() {
         .bindPopup(popupHtml(point), { closeButton: true });
     });
 
-    map.fitBounds(casing.getBounds(), { padding: [36, 36] });
+    map.fitBounds(L.latLngBounds(allLatLngs), { padding: [36, 36] });
 
     const observer = new ResizeObserver(() => map.invalidateSize());
     observer.observe(node);
@@ -166,51 +196,97 @@ export function RouteMap() {
             </span>
           ))}
           <span className="flex items-center gap-1.5">
+            <span aria-hidden="true" className="h-0.5 w-5 bg-port" />
+            <span className="eyebrow text-slate-ink">Public road</span>
+          </span>
+          <span className="flex items-center gap-1.5">
             <span
               aria-hidden="true"
-              className="h-2.5 w-2.5 rounded-full border border-dashed border-slate-ink"
+              className="h-0 w-5 border-t-2 border-dashed border-amber-700"
             />
-            <span className="eyebrow text-slate-ink">Not plotted</span>
+            <span className="eyebrow text-slate-ink">Inside port — per SMPA</span>
           </span>
         </div>
       </Card>
 
-      {/* Points that must not be guessed. */}
+      {/* Provenance: what SMPA has confirmed, and what is still outstanding. */}
       <Card className="mt-3 px-4 py-4 sm:px-5">
         <p className="flex items-start gap-2 text-[13px] leading-relaxed text-slate-ink">
           <Info size={15} strokeWidth={2} className="mt-0.5 shrink-0 text-port" aria-hidden="true" />
           <span>
-            Plotted positions are approximate and indicative. The following locations are inside
-            the access-controlled port area and are <strong className="font-semibold text-navy">not plotted</strong>{' '}
-            — their positions have not been confirmed by SMPA and have not been invented.
+            The dashed leg inside the port area is drawn only to connect the two confirmed points.
+            It is not a routed road — movement inside the dock follows the SMPA-designated
+            sequence set out under stop 03.
           </span>
         </p>
-        <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-          {unplotted.map((point) => {
-            const Icon = iconForPoint(point);
-            return (
-              <li
-                key={point.key}
-                className="flex items-center gap-2.5 rounded-md border border-dashed border-rule bg-offwhite px-3 py-2.5"
-              >
-                <StopNumber number={point.id} type={point.type} size="sm" />
-                <span className="min-w-0">
-                  <span className="flex items-center gap-1.5">
-                    <Icon size={12} strokeWidth={2} className="text-slate-ink" aria-hidden="true" />
-                    <span className="truncate text-[14px] font-medium text-navy">{point.name}</span>
-                  </span>
-                  <span className="eyebrow block text-slate-ink">{coordinatesPlaceholder}</span>
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+
+        {confirmed.length > 0 && (
+          <>
+            <p className="eyebrow mt-4 text-port">Coordinates confirmed by SMPA</p>
+            <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+              {confirmed.map((point) => {
+                const Icon = iconForPoint(point);
+                return (
+                  <li
+                    key={point.key}
+                    className="flex items-center gap-2.5 rounded-md border border-port-100 bg-port-50 px-3 py-2.5"
+                  >
+                    <StopNumber number={point.id} type={point.type} size="sm" />
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-1.5">
+                        <Icon size={12} strokeWidth={2} className="text-port" aria-hidden="true" />
+                        <span className="truncate text-[14px] font-medium text-navy">
+                          {point.name}
+                        </span>
+                      </span>
+                      <span className="block font-mono text-[11px] tabular-nums text-slate-ink">
+                        {point.coordinates!.lat.toFixed(6)}, {point.coordinates!.lng.toFixed(6)}
+                      </span>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+
+        {unplotted.length > 0 && (
+          <>
+            <p className="eyebrow mt-4 text-slate-ink">Not plotted — awaiting SMPA</p>
+            <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+              {unplotted.map((point) => {
+                const Icon = iconForPoint(point);
+                return (
+                  <li
+                    key={point.key}
+                    className="flex items-center gap-2.5 rounded-md border border-dashed border-rule bg-offwhite px-3 py-2.5"
+                  >
+                    <StopNumber number={point.id} type={point.type} size="sm" />
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-1.5">
+                        <Icon size={12} strokeWidth={2} className="text-slate-ink" aria-hidden="true" />
+                        <span className="truncate text-[14px] font-medium text-navy">
+                          {point.name}
+                        </span>
+                      </span>
+                      <span className="eyebrow block text-slate-ink">{coordinatesPlaceholder}</span>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
       </Card>
 
       <div className="action-bar mt-3">
         <ActionLink href={fullRouteUrl()} icon={Navigation} variant="primary">
           Open prescribed route in Google Maps
         </ActionLink>
+        <p className="mt-2 text-[12px] leading-relaxed text-slate-ink">
+          Routes over public roads only, through the two SMPA-confirmed points. It does not
+          reproduce movement inside the dock — follow the sequence given at stop 03.
+        </p>
       </div>
     </section>
   );

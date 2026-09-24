@@ -13,28 +13,31 @@
  *
  * COORDINATE POLICY
  * -----------------
- * No coordinate in this file has been surveyed or confirmed by SMPA.
+ * Gate No. 7 (NSD) and Century Ports Ltd., KPD-I (West) carry coordinates
+ * supplied by SMPA. Every other coordinate is an unsurveyed approximation, and
+ * the remaining port locations carry none at all.
  *
- *   accuracy: 'approximate'  A publicly known landmark or public road. The
- *                            point is good enough to draw an indicative
- *                            corridor on the illustrative map. It is NOT used
- *                            for turn-by-turn navigation.
- *   accuracy: 'unconfirmed'  Coordinates deliberately left as `null`. These are
- *                            access-controlled port gates and terminal
- *                            locations that MUST NOT be guessed. The interface
- *                            renders "COORDINATES TO BE CONFIRMED BY SMPA".
+ *   accuracy: 'confirmed'    Supplied by SMPA for this visit. Safe to use for
+ *                            navigation. These points ARE used to build
+ *                            coordinate-based Google Maps links, which is more
+ *                            reliable than a place name for an access-
+ *                            controlled gate that Google may not index.
+ *   accuracy: 'approximate'  A publicly known landmark or public road, not
+ *                            surveyed. Good enough to draw an indicative
+ *                            corridor on the map. NOT used for navigation —
+ *                            those links use place-name queries so Google
+ *                            resolves them against its own database.
+ *   coordinates: null        Deliberately absent. Access-controlled locations
+ *                            that MUST NOT be guessed. The interface renders
+ *                            "COORDINATES TO BE CONFIRMED BY SMPA" and shows no
+ *                            navigation button.
  *
- * Navigation deep links are built from PLACE-NAME QUERIES, not from the
- * coordinates below, so Google Maps resolves them against its own database
- * rather than against an approximate point in this file. A stop without a
- * `mapsQuery` shows no navigation button at all — by design.
- *
- * The guide remains fully usable while every coordinate below is unconfirmed.
+ * The guide remains fully usable while any coordinate below is unconfirmed.
  */
 
 export type StopType = 'start' | 'road' | 'gate' | 'visit' | 'end';
 export type PhaseId = 'arrival' | 'port-visit' | 'departure';
-export type Accuracy = 'approximate' | 'unconfirmed';
+export type Accuracy = 'confirmed' | 'approximate';
 
 export interface Coordinates {
   lat: number;
@@ -70,6 +73,12 @@ export interface RoutePoint {
   coordinates: Coordinates | null;
   /** Short form used in the Driver View. */
   driver: { action: string; primary: string; secondary?: string };
+  /**
+   * SMPA-designated movement inside the controlled port area, reproduced as
+   * supplied. This is NOT derived from any mapping service and is never drawn
+   * as a routed path.
+   */
+  internalMovement?: { title: string; source: string; steps: string[] };
 }
 
 export interface Phase {
@@ -95,8 +104,14 @@ export interface VisitDetails {
    SITE
    ========================================================================== */
 
-/** Replace after the first deployment. Used for the QR code and share links. */
-export const SITE_URL: string = 'ADD_DEPLOYED_URL_HERE';
+/**
+ * The live address, used for the QR code and share links.
+ *
+ * This is currently a claude.ai preview link. Replace it with the final
+ * government-appropriate domain once the site is deployed to Vercel, Netlify
+ * or GitHub Pages, and redeploy — the QR code regenerates automatically.
+ */
+export const SITE_URL: string = 'https://claude.ai/artifact/V1b6zNBYfB22dqQPQ7yk32';
 
 export const site = {
   authority: 'Syama Prasad Mookerjee Port, Kolkata',
@@ -219,8 +234,10 @@ export const routePoints: RoutePoint[] = [
     phase: 'arrival',
     label: 'Prescribed Road',
     instruction: 'Proceed along C.G.R. Road towards Gate No. 7.',
+    // Approximate. Positioned to stay consistent with the SMPA-confirmed Gate
+    // No. 7 coordinate, which lies west of it. Replace when surveyed.
     mapsQuery: 'Circular Garden Reach Road, Kolkata',
-    coordinates: { lat: 22.5379, lng: 88.3223, accuracy: 'approximate' },
+    coordinates: { lat: 22.5415, lng: 88.3105, accuracy: 'approximate' },
     driver: { action: 'Continue', primary: 'C.G.R. Road' },
   },
   {
@@ -232,8 +249,10 @@ export const routePoints: RoutePoint[] = [
     label: 'Entry',
     instruction: 'Enter Netaji Subhas Dock through Gate No. 7.',
     note: 'Present visit authorisation at the gate as instructed by SMPA security personnel.',
-    // No mapsQuery: access-controlled gate, not reliably resolvable.
-    coordinates: null,
+    // Coordinates confirmed by SMPA. The gate is not reliably indexed by name,
+    // so the navigation link is built from the coordinate itself.
+    mapsQuery: '22.538664441987077,88.30272901649285',
+    coordinates: { lat: 22.538664441987077, lng: 88.30272901649285, accuracy: 'confirmed' },
     driver: { action: 'Enter', primary: 'NSD Gate No. 7' },
   },
   {
@@ -248,6 +267,20 @@ export const routePoints: RoutePoint[] = [
     note: 'Follow SMPA-designated internal movement instructions. Internal dock roads are not taken from Google Maps.',
     coordinates: null,
     driver: { action: 'Dock Visit', primary: 'Netaji Subhas Dock' },
+    internalMovement: {
+      title: 'Within-Dock Movement',
+      source: 'As designated by SMPA. Reproduced as supplied — not a mapped or navigable route.',
+      steps: [
+        'Gate No. 7, NSD',
+        'Berth No. 7 (JSW)',
+        'Past Gate No. 4',
+        'Past Gate No. 3',
+        'To Berth No. 2 (200 T crane) OR to Clock Tower & NSD Lock',
+        'Out from Gate No. 3',
+        'Along Garden Reach Road',
+        'Dock-I (West), KPD',
+      ],
+    },
   },
   {
     id: 4,
@@ -280,8 +313,9 @@ export const routePoints: RoutePoint[] = [
     phase: 'port-visit',
     label: 'Terminal Visit',
     instruction: 'Proceed to Century Ports Ltd. terminal at KPD-I (West).',
-    note: 'Navigation link will be enabled once SMPA confirms a reliable destination for this terminal.',
-    coordinates: null,
+    // Coordinates confirmed by SMPA.
+    mapsQuery: '22.544800013977607,88.31465928758686',
+    coordinates: { lat: 22.544800013977607, lng: 88.31465928758686, accuracy: 'confirmed' },
     driver: { action: 'Stop', primary: 'Century Ports Ltd.', secondary: 'KPD-I (West)' },
   },
   {
@@ -293,7 +327,7 @@ export const routePoints: RoutePoint[] = [
     label: 'Prescribed Road',
     instruction: 'On exiting the port area, rejoin C.G.R. Road.',
     mapsQuery: 'Circular Garden Reach Road, Kolkata',
-    coordinates: { lat: 22.5379, lng: 88.3223, accuracy: 'approximate' },
+    coordinates: { lat: 22.5415, lng: 88.3105, accuracy: 'approximate' },
     driver: { action: 'Continue', primary: 'C.G.R. Road' },
   },
   {

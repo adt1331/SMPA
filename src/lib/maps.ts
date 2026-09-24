@@ -63,10 +63,16 @@ function corridor(keys: string[]): string[] {
 }
 
 /**
- * The full prescribed public-road corridor, start to finish.
+ * The full prescribed corridor, start to finish.
  *
- * Internal port gates and berths are deliberately absent — they are not
- * publicly routable and are governed by SMPA instructions, not by Google Maps.
+ * Gate No. 7 and Century Ports Ltd. are included because SMPA has confirmed
+ * their coordinates, so Google can route to them exactly. Everything between
+ * those two points is routed by Google over PUBLIC roads only — it is not, and
+ * must not be presented as, the SMPA-designated movement inside the dock,
+ * which is given verbatim at stop 03.
+ *
+ * Gate No. 3 and 2 KPD Gate are absent: their positions are unconfirmed and
+ * are not guessed.
  */
 export function fullRouteUrl(opts: { navigate?: boolean } = {}): string {
   const stops = corridor([
@@ -74,6 +80,8 @@ export function fullRouteUrl(opts: { navigate?: boolean } = {}): string {
     'maa-flyover',
     'kidderpore-road',
     'cgr-road-inbound',
+    'nsd-gate-7',
+    'century-ports-kpd-1-west',
     'hastings',
     'smpa-head-office',
   ]);
@@ -82,19 +90,25 @@ export function fullRouteUrl(opts: { navigate?: boolean } = {}): string {
   return directionsUrl(origin, destination, stops.slice(1, -1), opts);
 }
 
-/** Phase 1 — arrival leg, up to the public-road approach to Gate No. 7. */
+/** Phase 1 — arrival leg, ending at the SMPA-confirmed Gate No. 7. */
 export function arrivalLegUrl(opts: { navigate?: boolean } = {}): string {
   const stops = corridor([
     'itc-royal-bengal',
     'maa-flyover',
     'kidderpore-road',
     'cgr-road-inbound',
+    'nsd-gate-7',
   ]);
   return directionsUrl(stops[0], stops[stops.length - 1], stops.slice(1, -1), opts);
 }
 
-/** Phase 3 — departure leg, from the public road back to Strand Road. */
+/** Phase 3 — departure leg, from the confirmed terminal back to Strand Road. */
 export function departureLegUrl(opts: { navigate?: boolean } = {}): string {
-  const stops = corridor(['cgr-road-outbound', 'hastings', 'smpa-head-office']);
+  const stops = corridor([
+    'century-ports-kpd-1-west',
+    'cgr-road-outbound',
+    'hastings',
+    'smpa-head-office',
+  ]);
   return directionsUrl(stops[0], stops[stops.length - 1], stops.slice(1, -1), opts);
 }

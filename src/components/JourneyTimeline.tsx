@@ -1,4 +1,4 @@
-import { Lock, MapPin, Navigation, ShieldAlert } from 'lucide-react';
+import { Lock, MapPin, Navigation, ShieldAlert, Waypoints } from 'lucide-react';
 import {
   coordinatesPlaceholder,
   phases,
@@ -117,6 +117,31 @@ function StopStep({ point, last }: { point: RoutePoint; last: boolean }) {
             <ShieldAlert size={14} strokeWidth={2} className="mt-0.5 shrink-0 text-port" aria-hidden="true" />
             <span>{point.note}</span>
           </p>
+        )}
+
+        {point.internalMovement && (
+          <div className="mt-3 rounded-md border border-amber-200 bg-amber-50/60 px-3.5 py-3">
+            <p className="eyebrow flex items-center gap-1.5 text-amber-900">
+              <Waypoints size={13} strokeWidth={2} aria-hidden="true" />
+              {point.internalMovement.title}
+            </p>
+            <ol className="mt-2 space-y-1">
+              {point.internalMovement.steps.map((step, index) => (
+                <li
+                  key={step}
+                  className="flex gap-2 text-[14px] leading-snug text-navy"
+                >
+                  <span aria-hidden="true" className="w-4 shrink-0 tabular-nums text-[12px] text-amber-800">
+                    {index + 1}.
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-2.5 text-[12px] leading-relaxed text-amber-900/80">
+              {point.internalMovement.source}
+            </p>
+          </div>
         )}
 
         {navigable ? (
