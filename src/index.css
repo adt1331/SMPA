@@ -1,0 +1,185 @@
+@import 'tailwindcss';
+@import 'leaflet/dist/leaflet.css';
+
+/* ==========================================================================
+   DESIGN TOKENS
+   Government institution × international port authority × management
+   consulting. Flat colour, thin rules, restrained shadow. No gradients.
+   ========================================================================== */
+@theme {
+  --color-navy: #0b2942;
+  --color-navy-700: #14385c;
+  --color-port: #165d82;
+  --color-port-50: #eef4f8;
+  --color-port-100: #d9e7ef;
+  --color-offwhite: #f6f8fa;
+  --color-slate-ink: #52616b;
+  --color-rule: #dfe5ea;
+
+  --font-sans: 'Inter', 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --shadow-card: 0 1px 2px rgba(11, 41, 66, 0.04), 0 1px 3px rgba(11, 41, 66, 0.06);
+  --shadow-raised: 0 2px 6px rgba(11, 41, 66, 0.08);
+}
+
+:root {
+  color-scheme: light;
+  --app-bg: var(--color-offwhite);
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Sticky header + bottom nav offsets for in-page anchors. */
+  scroll-padding-top: 5rem;
+}
+
+body {
+  margin: 0;
+  background: var(--app-bg);
+  color: var(--color-navy);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Never allow sideways scroll on a phone. */
+  overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Visible keyboard focus everywhere. */
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-port);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ==========================================================================
+   SMALL UPPERCASE STATUS LABEL
+   ========================================================================== */
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   LEAFLET
+   ========================================================================== */
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: #e8edf1;
+}
+.leaflet-control-attribution {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.85);
+}
+/* Keep the map calm: no unrelated POI clutter competing with the route. */
+.route-map-tiles { filter: saturate(0.45) contrast(0.95) brightness(1.04); }
+
+.marker-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(11, 41, 66, 0.35);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-sans);
+  letter-spacing: 0.01em;
+}
+.marker-pin--start { background: var(--color-navy); }
+.marker-pin--end { background: var(--color-navy); }
+.marker-pin--gate { background: #8a5a00; }
+.marker-pin--visit { background: var(--color-port); }
+.marker-pin--road {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 2px solid var(--color-port);
+  box-shadow: none;
+}
+.marker-pin--unconfirmed {
+  background: #fff;
+  color: var(--color-slate-ink);
+  border: 2px dashed var(--color-slate-ink);
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   PRINT — professional one/two page route sheet
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 11mm 12mm 10mm;
+  }
+
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 10pt;
+  }
+
+  /* Suppress all interactive chrome and the on-screen layout. */
+  .no-print,
+  .screen-only,
+  header.site-header,
+  nav.bottom-nav,
+  .action-bar,
+  .view-toggle {
+    display: none !important;
+  }
+
+  .print-only { display: block !important; }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+  /* Neutralise the on-screen vertical rhythm so the sheet stays compact. */
+  main > * + * { margin-top: 0 !important; }
+
+  section { break-inside: avoid; page-break-inside: avoid; }
+
+  /* Map: keep it, strip its on-screen furniture. */
+  #map { margin: 3mm 0 0 !important; }
+  #map > div:not(.card) { display: none !important; }
+  #map .card + .card { display: none !important; }
+  #map .card > div:last-child:not([role='application']) { display: none !important; }
+  .leaflet-container {
+    height: 62mm !important;
+    border: 0.5pt solid #999;
+  }
+  .leaflet-control-container { display: none !important; }
+
+  .card {
+    box-shadow: none !important;
+    border: 0.5pt solid #999 !important;
+    background: #fff !important;
+    border-radius: 0 !important;
+  }
+
+  a { color: #000 !important; text-decoration: none !important; }
+
+  table { break-inside: auto; }
+  tr, img { break-inside: avoid; page-break-inside: avoid; }
+  thead { display: table-header-group; }
+
+  .break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
+}
+
+.print-only { display: none; }
+
